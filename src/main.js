@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from '@three-ts/orbit-controls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GodRaysDepthMaskShader, TextGeometry } from 'three/examples/jsm/Addons.js';
+import { FontLoader } from 'three/examples/jsm/Addons.js';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -121,6 +123,15 @@ function createDeskComponent(width,height,depth) {
     return desk;
 }
 
+function createDeskWallComponent(width,height,depth) {
+    const deskMaterial = createMaterial("lambert",0xa1a3ad);
+
+    const deskGeo = new THREE.BoxGeometry(width,height,depth);
+    const desk = new THREE.Mesh(deskGeo,deskMaterial);
+
+    return desk;
+}
+
 function createDesk() {
     const desk1 = createDeskComponent(14,0.1,3);
     desk1.position.set(-3,3,-4.5);
@@ -136,16 +147,16 @@ function createDesk() {
     desk3.position.set(2.5,3,-1.5);
     scene.add(desk3);
 
-    const deskWall1 = createDeskComponent(14,5,0.1);
+    const deskWall1 = createDeskWallComponent(14,5,0.1);
     deskWall1.position.set(-3,2.5,-5.9);
     scene.add(deskWall1);
 
-    const deskWall2 = createDeskComponent(8,5,0.1);
+    const deskWall2 = createDeskWallComponent(8,5,0.1);
     deskWall2.position.set(-9.9,2.5,-2);
     deskWall2.rotation.y = horizontalRotation;
     scene.add(deskWall2);
 
-    const deskWall3 = createDeskComponent(6,5,0.1);
+    const deskWall3 = createDeskWallComponent(6,5,0.1);
     deskWall3.rotation.y = horizontalRotation;
     deskWall3.position.set(4,2.5,-3);
     scene.add(deskWall3);
@@ -242,6 +253,23 @@ function loadChair() {
     })
 }
 
+function deskText() {
+    const loader = new FontLoader();
+    
+    loader.load('node_modules/three/examples/fonts/helvetiker_bold.typeface.json', 
+        function (font) {
+        const textGeo = new TextGeometry('427', {
+            font: font,
+            size: 1,
+            depth: 0.1,
+        })
+        const textMaterial = createMaterial("lambert",0xf5ca67);
+        const textMesh = new THREE.Mesh(textGeo,textMaterial);
+        textMesh.position.set(-2,3.5,-5.9);
+        scene.add(textMesh);
+    })
+}
+
 createRoom();
 createDrawer();
 createDesk();
@@ -250,6 +278,7 @@ createTableLegs();
 createPainting();
 loadComputer();
 loadChair();
+deskText();
 
 function animate() {
 	renderer.render( scene, camera );
