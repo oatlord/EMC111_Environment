@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '@three-ts/orbit-controls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -16,18 +17,34 @@ camera.lookAt(0, 0, 0);
 const controls = new OrbitControls(camera,renderer.domElement);
 controls.update();
 
-// e7e9fe code for color i want later
-const directLight = new THREE.DirectionalLight(0x6d7391, 2);
+// lights configuration
+const directLight = new THREE.DirectionalLight(0x6d7391, 3);
 directLight.position.set(5, 15, 5).normalize();
+directLight.castShadow = true;
 scene.add(directLight);
 
-const spotLight = new THREE.SpotLight(0xffffff,250);
-spotLight.position.set(8,12,0);
-spotLight.penumbra = 0.3;
+const ambientLight = new THREE.AmbientLight(0x2e2cc7,0.05);
+scene.add(ambientLight);
+
+const spotLightTarget = new THREE.Object3D();
+scene.add(spotLightTarget);
+spotLightTarget.position.set(-5,2,-2);
+
+const spotLight = new THREE.SpotLight(0xffffff,300);
+spotLight.position.set(10,20,10);
+spotLight.penumbra = 0.6;
+spotLight.angle = 0.3;
+spotLight.decay = 1.5;
+spotLight.target = spotLightTarget;
+spotLight.castShadow = true;
 scene.add(spotLight);
+
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+// scene.add(spotLightHelper);
 
 let horizontalRotation = -Math.PI/2;
 
+// some helper functions
 function createMaterial(type,color) {
     if (type == "lambert") {
         return new THREE.MeshLambertMaterial({color});
@@ -43,6 +60,7 @@ function createTexture(filePath) {
     return loader;
 }
 
+// room creation
 function createRoom() {
 	const roomMaterial = createMaterial("lambert",0xf5f4f2);
     const floorMaterial = createMaterial("lambert",0xc29957);
@@ -61,6 +79,7 @@ function createRoom() {
 	scene.add(leftWall);
 }
 
+// drawer creation, drawerComponent adjusts position
 function createDrawerComponent(x,y,z) {
     const cabinetMaterial = createMaterial("phong",0xa1a3ad);
 
@@ -92,6 +111,7 @@ function createDrawer() {
     scene.add(drawer6);
 }
 
+// desk creation, deskComponent adjusts size
 function createDeskComponent(width,height,depth) {
     const deskMaterial = createMaterial("lambert",0xf5f8fc);
 
@@ -129,8 +149,10 @@ function createDesk() {
     deskWall3.rotation.y = horizontalRotation;
     deskWall3.position.set(4,2.5,-3);
     scene.add(deskWall3);
+
 }
 
+// table drawer creation, component adjusts position
 function createTableDrawerComponent(x,y,z) {
     const tableDeskMaterial = createMaterial("lambert",0xa1a3ad);
     const tableDeskGeo = new THREE.BoxGeometry(3,3,2);
@@ -153,6 +175,7 @@ function createTableDrawer() {
     scene.add(tableDesk3);
 }
 
+// create table legs
 function createTableFootComponent(x,y,z) {
     const tableLegMaterial = createMaterial("lambert", 0xa1a3ad);
 
@@ -185,18 +208,48 @@ function createTableLegs() {
     scene.add(tableLeg2);
 }
 
-// function createPainting() {
-//     const frame = new THREE.Mesh(new THREE.BoxGeometry(1,1,0.1),new THREE.Material({color: 0xa1a3ad}));
+function createPainting() {
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(2.8,2.8,0.1),new THREE.MeshLambertMaterial({color: 0xfffffff}));
+    frame.position.set(-4,7.5,-5.9);
+    scene.add(frame);
 
-//     scene.add(frame);
-// }
+    const textureLoader = createTexture("textures/meadow.jpg");
+    
+    const painting = new THREE.Mesh(new THREE.BoxGeometry(2.2,2.2,0.1), new THREE.MeshLambertMaterial({map:textureLoader}));
+    painting.position.set(-4,7.5,-5.8);
+    scene.add(painting);
+}
+
+function loadComputer() {
+    const loader = new GLTFLoader();
+    loader.load('/models/retro_computerGLB/retro_computer.glb', function (gltf) {
+        gltf.scene.position.set(-8.5,3.8,-2);
+        scene.add(gltf.scene);
+    },undefined, function (error) {
+        console.error(error);
+    })
+}
+
+function loadChair() {
+    const loader = new GLTFLoader();
+    loader.load('/models/1960s_office_chairGLB/1960s_office_chair.glb', function (gltf) {
+        gltf.scene.position.set(-7,0,-2);
+        gltf.scene.rotation.y = horizontalRotation;
+        gltf.scene.scale.set(3,3,3);
+        scene.add(gltf.scene);
+    },undefined, function (error) {
+        console.error(error);
+    })
+}
 
 createRoom();
 createDrawer();
 createDesk();
 createTableDrawer();
 createTableLegs();
-// createPainting();
+createPainting();
+loadComputer();
+loadChair();
 
 function animate() {
 	renderer.render( scene, camera );
