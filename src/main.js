@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from '@three-ts/orbit-controls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { FontLoader } from 'three/examples/jsm/Addons.js';
+import { TextGeometry } from 'three/examples/jsm/Addons.js';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
