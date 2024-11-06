@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '@three-ts/orbit-controls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { GodRaysDepthMaskShader, TextGeometry } from 'three/examples/jsm/Addons.js';
 import { FontLoader } from 'three/examples/jsm/Addons.js';
 
 // Set up the scene, camera, and renderer
@@ -10,6 +9,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+let stars, starGeo;
 
 camera.position.z = 15;
 camera.position.y = 20;
@@ -17,6 +17,8 @@ camera.position.x = 10;
 camera.lookAt(0, 0, 0);
 
 const controls = new OrbitControls(camera,renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
 controls.update();
 
 // lights configuration
@@ -270,6 +272,44 @@ function deskText() {
     })
 }
 
+function particles() {
+    const points = [];
+  
+    for (let i = 0; i < 600; i++) {
+      let star = new THREE.Vector3(
+        Math.random() * 1000 - 300,
+        Math.random() * 1000 - 300,
+        Math.random() * 1000 - 300
+      );
+      points.push(star);
+    }
+  
+    starGeo = new THREE.BufferGeometry().setFromPoints(points);
+  
+    let sprite = new THREE.TextureLoader().load("textures/star.png");
+    let starMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 1,
+      map: sprite,
+    });
+  
+    stars = new THREE.Points(starGeo, starMaterial);
+    scene.add(stars);
+  }
+
+  function animateParticles() {
+    starGeo.verticesNeedUpdate = true;
+    if (stars.position.y < -600 && stars.position.x < -600) {
+      stars.position.y = 200;
+      stars.position.x = 200;
+    } else {
+      stars.position.y -= 0.5;
+      stars.position.x -= 0.5;
+    }
+    // stars.rotation.y += 0.002;
+    // stars.rotation.x += 0.002;
+  }
+
 createRoom();
 createDrawer();
 createDesk();
@@ -279,9 +319,12 @@ createPainting();
 loadComputer();
 loadChair();
 deskText();
+particles();
 
 function animate() {
 	renderer.render( scene, camera );
+    controls.update();
+    animateParticles();
 }
 renderer.setAnimationLoop( animate );
 
