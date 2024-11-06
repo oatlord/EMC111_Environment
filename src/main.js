@@ -304,8 +304,8 @@ function particles() {
       stars.position.y = 200;
       stars.position.x = 200;
     } else {
-      stars.position.y -= 0.5;
-      stars.position.x -= 0.5;
+      stars.position.y -= 0.05;
+      stars.position.x -= 0.05;
     }
     // stars.rotation.y += 0.002;
     // stars.rotation.x += 0.002;
